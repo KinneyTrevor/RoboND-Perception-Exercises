@@ -56,17 +56,54 @@ def pcl_callback(pcl_msg):
     extracted_cloud_objects_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=True)
     
     # TODO: Euclidean Clustering
+    # PCL Euclidiean Clustering only supports k-d trees
+    # Need to remove color data
+    white_cloud = XYZRGB_to_XYZ(extracted_cloud_objects_inliers)
+    tree = white_cloud.make_kdtree()
+
+    # Create a cluster extraction object
+    color_extraction_object = white_cloud.make_EuclideanClusterExtraction()
+
+    # Set tolerances for distance threshold
+    color_extraction_object.set_ClusterTolerance(0.011)
+    
+    # Set min/max cluster size(in points)
+    # Need to tweak params
+    color_extraction_object.set_MinClusterSize(25)
+    color_extraction_object.set_MaxClusterSize(500)
+
+    # Search the kd tree for clusters
+    color_extraction_object.set_SearchMethod(tree)
+
+    # Get dem indices
+    cluster_indices = color_extraction_object.Extract()
 
     # TODO: Create Cluster-Mask Point Cloud to visualize each cluster separately
+    # Give each cluster a color
+    cluster_color = get_color_list(len(cluster_indices))
+
+    color_cluster_point_list = []
+
+    for j, indices in enumerate(cluster_indices):
+        for i, indice in enumerate(indices):
+            color_cluster_point_list.append([white_cloud[indice][0],
+                                            white_cloud[indice][1],
+                                            white_cloud[indice][2],
+                                            rgb_to_float(cluster_color[j])])
+
+    # Create new cloud containing all clusters but with unique colors
+    cluster_cloud = pcl.PointCloud_PointXYZRGB()
+    cluster_cloud.from_list(color_cluster_point_list)
 
     # Convert PCL data to ROS messages
     ros_cloud_objects = pcl_to_ros(extracted_cloud_objects_inliers)
     ros_cloud_table = pcl_to_ros(extracted_cloud_table_inliers)
+    ros_cluster_cloud = pcl_to_ros(cluster_cloud)
 
     # TODO: Publish ROS messages
     pcl_objects_pub.publish(ros_cloud_objects)
     pcl_table_pub.publish(ros_cloud_table)
-    
+    pcl_color_cluster_pub.publish(ros_cluster_cloud)
 
 
 if __name__ == '__main__':
@@ -80,6 +117,7 @@ if __name__ == '__main__':
     # TODO: Create Publishers
     pcl_objects_pub = rospy.Publisher("/pcl_objects", PointCloud2, queue_size=1)
     pcl_table_pub = rospy.Publisher("/pcl_table", PointCloud2, queue_size=1)
+    pcl_color_cluster_pub = rospy.Publisher("/pcl_clusters", PointCloud2, queue_size=1)
     
     # Initialize color_list
     get_color_list.color_list = []

@@ -78,4 +78,4 @@ pcl.save(extracted_inliers, filename)
 
 # # Save pcd for tabletop object
  filename = 'extracted_outliers'
- pcl.save(extracted_inliers, filename)
+1 pcl.save(extracted_inliers, filename)
