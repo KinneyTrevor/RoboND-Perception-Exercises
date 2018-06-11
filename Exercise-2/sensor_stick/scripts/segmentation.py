@@ -21,49 +21,51 @@ def pcl_callback(pcl_msg):
     
     # # Will probaly need to tweak leaf size
     LEAF_SIZE = 0.01
-    my_voxel_grid_filter.set_leaf_size(LEAF_SIZE, LEAF_SIZE)
+    my_voxel_grid_filter.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
     
     vox_filtered_cloud = my_voxel_grid_filter.filter()
 
-    # # TODO: PassThrough Filter
-    # my_passthrough_filtered_cloud = vox_filtered_cloud.make_passthrough_filter()
+    # PassThrough Filter
+    my_passthrough_filtered_cloud = vox_filtered_cloud.make_passthrough_filter()
 
-    # filter_axis = 'z'
+    filter_axis = 'z'
     
-    # # Will probably need to tweak these too
-    # axis_min = 0.6
-    # axis_max = 1.1
+    # Will probably need to tweak these too
+    axis_min = 0.6
+    axis_max = 1.1
     
-    # my_passthrough_filtered_cloud.set_filter_field_name(filter_axis)
-    # my_passthrough_filtered_cloud.set_filter_limits(axis_min, axis_max)
+    my_passthrough_filtered_cloud.set_filter_field_name(filter_axis)
+    my_passthrough_filtered_cloud.set_filter_limits(axis_min, axis_max)
 
-    # vox_and_passthrough_filtered_cloud = my_passthrough_filtered_cloud.filter()
+    vox_and_passthrough_filtered_cloud = my_passthrough_filtered_cloud.filter()
 
-    # # TODO: RANSAC Plane Segmentation
-    # my_seg = vox_and_passthrough_filtered_cloud.make_segmenter()
+    # RANSAC Plane Segmentation
+    my_seg = vox_and_passthrough_filtered_cloud.make_segmenter()
 
-    # # Segmentation models to be fitted for filtering
-    # my_seg.set_model_type(pcl.SACMODEL_PLANE)
-    # my_seg.set_model_type(pcl.SAC_RANSAC)
+    # Segmentation models to be fitted for filtering
+    my_seg.set_model_type(pcl.SACMODEL_PLANE)
+    my_seg.set_model_type(pcl.SAC_RANSAC)
 
-    # # Set max distance and threshold to be considered a part of the model
-    # max_distance = 0.01
-    # my_seg.set_distance_threshold(max_distance)
-    # inliers, coefficient = seg.segment()
+    # Set max distance and threshold to be considered a part of the model
+    max_distance = 0.01
+    my_seg.set_distance_threshold(max_distance)
+    inliers, coefficient = my_seg.segment()
 
-    # # TODO: Extract inliers and outliers
-    # extracted_cloud_table_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=True)
-    # extracted_cloud_objects_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=False)
+    # Extract inliers and outliers
+    extracted_cloud_table_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=False)
+    extracted_cloud_objects_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=True)
     
-    # # TODO: Euclidean Clustering
+    # TODO: Euclidean Clustering
 
-    # # TODO: Create Cluster-Mask Point Cloud to visualize each cluster separately
+    # TODO: Create Cluster-Mask Point Cloud to visualize each cluster separately
 
-    # # TODO: Convert PCL data to ROS messages
+    # Convert PCL data to ROS messages
+    ros_cloud_objects = pcl_to_ros(extracted_cloud_objects_inliers)
+    ros_cloud_table = pcl_to_ros(extracted_cloud_table_inliers)
 
-    # # TODO: Publish ROS messages
-    # pcl_objects_pub.publish(pcl_msg)
-    # pcl_table_pub.publish(pcl_msg)
+    # TODO: Publish ROS messages
+    pcl_objects_pub.publish(ros_cloud_objects)
+    pcl_table_pub.publish(ros_cloud_table)
     
 
 
