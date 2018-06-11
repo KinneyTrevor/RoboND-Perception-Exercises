@@ -65,12 +65,12 @@ def pcl_callback(pcl_msg):
     color_extraction_object = white_cloud.make_EuclideanClusterExtraction()
 
     # Set tolerances for distance threshold
-    color_extraction_object.set_ClusterTolerance(0.011)
+    color_extraction_object.set_ClusterTolerance(0.013)
     
     # Set min/max cluster size(in points)
     # Need to tweak params
-    color_extraction_object.set_MinClusterSize(25)
-    color_extraction_object.set_MaxClusterSize(500)
+    color_extraction_object.set_MinClusterSize(150)
+    color_extraction_object.set_MaxClusterSize(2600)
 
     # Search the kd tree for clusters
     color_extraction_object.set_SearchMethod(tree)
