@@ -51,10 +51,19 @@ def pcl_callback(pcl_msg):
     my_seg.set_distance_threshold(max_distance)
     inliers, coefficient = my_seg.segment()
 
-    # Extract inliers and outliers
+    # Extract inliers
     extracted_cloud_table_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=False)
     extracted_cloud_objects_inliers = vox_and_passthrough_filtered_cloud.extract(inliers, negative=True)
     
+    # Extract outliers
+    # objects_outlier_filter = extracted_cloud_objects_inliers.make_statistical_outlier_filter()
+    # objects_outlier_filter.set_mean_k(50)
+    # objects_outlier_filter.set_std_dev_mul_thresh(1.0)
+    # objects_outlier_filter.set_negative(True)
+
+    # extracted_cloud_objects_inliers = objects_outlier_filter.filter()
+
+
     # TODO: Euclidean Clustering
     # PCL Euclidiean Clustering only supports k-d trees
     # Need to remove color data
